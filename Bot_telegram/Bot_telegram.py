@@ -3,6 +3,7 @@
 
 import telebot
 import json
+print("VERSION 2026-06-29 TEST")
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -10,7 +11,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 # Token
 # =========================
 
-Token = "8834239764:AAEXsC9BWKMsdDvSL8N1og8TKRdHjE2u8gA"
+Token = "8834239764:AAFw1njM9Zu_UFOorTq-vV3Pj4OvA2fuW1w"
 bot = telebot.TeleBot(Token)
 
 # =========================
@@ -460,7 +461,8 @@ markup_dars.row(btn_riazi, btn_fizik)
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.send_message(message.chat.id,"سلام به ربات درس یار خوش آمدید.\nچطور می‌توانم کمکتان کنم؟",reply_markup=markup_btn)
+    bot.reply_to(message, "سلام، این نسخه جدید من است 🚀")
+    # bot.send_message(message.chat.id,"سلام به ربات درس یار خوش آمدید.\nچطور می‌توانم کمکتان کنم؟",reply_markup=markup_btn)
 
 # =========================
 # شروع یادگیری
