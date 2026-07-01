@@ -9,9 +9,9 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 # =========================
 # Token
 # =========================
+import os
 
-Token = "8834239764:AAF50eTb0B0p3S-Xp_rvKPP393eh3YQI2QU"
-bot = telebot.TeleBot(Token)
+bot = telebot.TeleBot(os.getenv("BOT_TOKEN"))
 
 # =========================
 # ذخیره اطلاعات کاربران
