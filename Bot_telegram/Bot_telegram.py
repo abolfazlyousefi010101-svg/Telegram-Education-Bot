@@ -18,6 +18,9 @@ bot = telebot.TeleBot(os.getenv("BOT_TOKEN"))
 # =========================
 
 user_data = {}
+user_history = {}
+page_history = {}
+
 
 # =========================
 # بخش دیکشنری
@@ -376,8 +379,58 @@ def load_questions(file_name):
         return json.load(file)
 
 
+def push_page(chat_id, page):
+    user_history.setdefault(chat_id, []).append(page)
 
 
+def pop_page(chat_id):
+    history = user_history.get(chat_id, [])
+
+    if len(history) > 1:
+        history.pop()
+
+    return history[-1] if history else "main"
+
+
+def back_button():
+    markup = types.InlineKeyboardMarkup()
+
+    markup.add(
+        types.InlineKeyboardButton(
+            "🔙 بازگشت",
+            callback_data="back"
+        )
+    )
+
+    return markup
+
+
+def save_page(chat_id, page):
+    if chat_id not in page_history:
+        page_history[chat_id] = []
+
+    if not page_history[chat_id] or page_history[chat_id][-1] != page:
+        page_history[chat_id].append(page)
+
+
+def previous_page(chat_id):
+    if chat_id not in page_history:
+        return "start"
+
+    if len(page_history[chat_id]) > 1:
+        page_history[chat_id].pop()
+
+    return page_history[chat_id][-1]
+
+
+def add_back_button(markup):
+    markup.row(
+        types.InlineKeyboardButton(
+            "🔙 بازگشت",
+            callback_data="back"
+        )
+    )
+    return markup
 
 # =========================
 # Reply Keyboard
@@ -476,6 +529,7 @@ def learning(message):
 
 @bot.message_handler(func=lambda message: message.text == "تجربی")
 def tajrobi(message):
+    save_page(message.chat.id, "tajrobi")
 
     user_data[message.chat.id] = {}
 
@@ -486,6 +540,7 @@ def tajrobi(message):
 
 @bot.message_handler(func=lambda message: message.text == "ریاضی")
 def riazi_field(message):
+    save_page(message.chat.id, "riazi")
 
     user_data[message.chat.id] = {}
 
@@ -496,6 +551,7 @@ def riazi_field(message):
 
 @bot.message_handler(func=lambda message: message.text == "انسانی")
 def ensani(message):
+    save_page(message.chat.id, "ensani")
 
     user_data[message.chat.id] = {}
 
@@ -509,6 +565,7 @@ def ensani(message):
 
 @bot.message_handler(func=lambda message: message.text == "دهم")
 def ten(message):
+    save_page(message.chat.id, "ten")
 
     user_data[message.chat.id]["base"] = "دهم"
 
@@ -517,12 +574,16 @@ def ten(message):
 
 @bot.message_handler(func=lambda message: message.text == "یازدهم")
 def eleven(message):
+    save_page(message.chat.id, "eleven")
+
     user_data[message.chat.id]["base"] = "یازدهم"
     bot.send_message(message.chat.id,"یکی از گزینه‌های زیر را انتخاب کنید.",reply_markup=markup_question)
 
 
 @bot.message_handler(func=lambda message: message.text == "کنکوری(دوازدهم)")
 def twelve(message):
+    save_page(message.chat.id, "twelve")
+
     user_data[message.chat.id]["base"] = "دوازدهم"
     bot.send_message(message.chat.id,"یکی از گزینه‌های زیر را انتخاب کنید.",reply_markup=markup_question)
 
@@ -532,6 +593,7 @@ def twelve(message):
 
 @bot.message_handler(func=lambda message: message.text == "سوالات کنکور و مشابه آن")
 def question(message):
+    save_page(message.chat.id, "question")
 
     bot.send_message(message.chat.id,"لطفاً درس مورد نظر را انتخاب کنید.",reply_markup=markup_dars)
 
