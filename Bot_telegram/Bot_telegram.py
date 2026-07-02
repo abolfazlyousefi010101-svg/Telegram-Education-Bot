@@ -3,9 +3,11 @@
 
 import telebot
 import json
+from keyboards import *
 from telebot import types
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from navigation import navigation
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from services import load_questions, make_inline_keyboard
 
 
 # =========================
@@ -366,18 +368,6 @@ goftar_data = {
 # -------------------------------
 # توابع و حلقه ها
 # -------------------------------
-def make_inline_keyboard(items):
-    keyboard = InlineKeyboardMarkup()
-    for item in items:
-        keyboard.add(InlineKeyboardButton(item,callback_data=item))
-    return keyboard
-
-
-def load_questions(file_name):
-    with open(f"data/{file_name}", "r", encoding="utf-8") as file:
-        return json.load(file)
-
-
 
 # =========================
 # Reply Keyboard
@@ -398,72 +388,7 @@ markup_konkur = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
 
 # =========================
-# دکمه های Reply Keyboard
-# =========================
-
-btn1 = types.KeyboardButton("شروع یادگیری")
-btn2 = types.KeyboardButton("معلم خصوصی هوشمند")
-
-fos1 = types.KeyboardButton("تجربی")
-fos2 = types.KeyboardButton("ریاضی")
-fos3 = types.KeyboardButton("انسانی")
-
-base1 = types.KeyboardButton("دهم")
-base2 = types.KeyboardButton("یازدهم")
-base3 = types.KeyboardButton("کنکوری(دوازدهم)")
-
-question1 = types.KeyboardButton("سوالات کنکور و مشابه آن")
-question2 = types.KeyboardButton("سوالات امتحان نهایی و مشابه آن")
-
-btn_back = types.KeyboardButton("🔙 بازگشت")
-
-markup_fos.add(fos1, fos2)
-markup_fos.add(fos3)
-markup_fos.row(btn_back)
-
-# =========================
-#   add Reply Keyboard
-# =========================
-
-markup_btn.add(btn1)
-markup_btn.add(btn2)
-
-markup_fos.add(fos1, fos2)
-markup_fos.add(fos3)
-
-markup_base.add(base1)
-markup_base.add(base2)
-markup_base.add(base3)
-
-markup_question.add(question1)
-markup_question.add(question2)
-
-markup_konkur.add(question1)
-
-# =========================
-# کیبورد نوع 2
-# =========================
-
-markup_dars = InlineKeyboardMarkup()
-# نکتهکیبورد های مربوط به انتخاب درس ها در قسمت مربوط به پاسخ به دکمه های روی صفحه قرار دارند
-
-
-# =========================
-# Inline Keyboard
-# =========================
-btn_zist = InlineKeyboardButton("زیست",callback_data="zist")
-
-btn_shimi = InlineKeyboardButton("شیمی",callback_data="shimi")
-
-btn_riazi = InlineKeyboardButton("ریاضی",callback_data="riazi")
-
-btn_fizik = InlineKeyboardButton("فیزیک",callback_data="fizik")
-# =========================
-# ضافه کردن دکمه به Inline Keyboard
-# =========================
-
-markup_dars.row(btn_zist, btn_shimi)
-markup_dars.row(btn_riazi, btn_fizik)
+# =======================
 
 # =========================
 # شروع ربات
@@ -485,8 +410,8 @@ def back_page(message):
     elif page == "tajrobi":
         tajrobi(message)
 
-    elif page == "riazi":
-        riazi(message)
+    # elif page == "riazi":
+        # riazi(message)
 
     elif page == "ensani":
         ensani(message)
@@ -512,8 +437,8 @@ def start(message):
     elif page == "tajrobi":
         tajrobi(message)
 
-    elif page == "riazi":
-        riazi(message)
+    # elif page == "riazi":
+    #     riazi(message)
 
     elif page == "ensani":
         ensani(message)
