@@ -394,7 +394,7 @@ markup_konkur = types.ReplyKeyboardMarkup(resize_keyboard=True)
 # شروع ربات
 # =========================
 
-@bot.message_handler(commands=["start"])
+
 
 @bot.message_handler(func=lambda m: m.text == "🔙 بازگشت")
 def back_page(message):
@@ -417,6 +417,7 @@ def back_page(message):
         ensani(message)
 
 
+@bot.message_handler(commands=["start"])
 def start(message):
     navigation.reset(message.chat.id)
     bot.send_message(message.chat.id,"سلام به ربات درس یار خوش آمدید.\nچطور می‌توانم کمکتان کنم؟",reply_markup=markup_btn)
