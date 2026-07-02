@@ -5,22 +5,21 @@ import telebot
 import json
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from navigation import navigation
+
 
 # =========================
 # Token
 # =========================
-import os
+from config import BOT_TOKEN
 
-bot = telebot.TeleBot(os.getenv("BOT_TOKEN"))
+bot = telebot.TeleBot(BOT_TOKEN)
 
 # =========================
 # ذخیره اطلاعات کاربران
 # =========================
 
 user_data = {}
-user_history = {}
-page_history = {}
-
 
 # =========================
 # بخش دیکشنری
@@ -379,58 +378,6 @@ def load_questions(file_name):
         return json.load(file)
 
 
-def push_page(chat_id, page):
-    user_history.setdefault(chat_id, []).append(page)
-
-
-def pop_page(chat_id):
-    history = user_history.get(chat_id, [])
-
-    if len(history) > 1:
-        history.pop()
-
-    return history[-1] if history else "main"
-
-
-def back_button():
-    markup = types.InlineKeyboardMarkup()
-
-    markup.add(
-        types.InlineKeyboardButton(
-            "🔙 بازگشت",
-            callback_data="back"
-        )
-    )
-
-    return markup
-
-
-def save_page(chat_id, page):
-    if chat_id not in page_history:
-        page_history[chat_id] = []
-
-    if not page_history[chat_id] or page_history[chat_id][-1] != page:
-        page_history[chat_id].append(page)
-
-
-def previous_page(chat_id):
-    if chat_id not in page_history:
-        return "start"
-
-    if len(page_history[chat_id]) > 1:
-        page_history[chat_id].pop()
-
-    return page_history[chat_id][-1]
-
-
-def add_back_button(markup):
-    markup.row(
-        types.InlineKeyboardButton(
-            "🔙 بازگشت",
-            callback_data="back"
-        )
-    )
-    return markup
 
 # =========================
 # Reply Keyboard
@@ -440,11 +387,15 @@ markup_btn = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
 markup_fos = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
+
 markup_base = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
 
 markup_question = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
+
 markup_konkur = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
 
 # =========================
 # دکمه های Reply Keyboard
@@ -463,6 +414,13 @@ base3 = types.KeyboardButton("کنکوری(دوازدهم)")
 
 question1 = types.KeyboardButton("سوالات کنکور و مشابه آن")
 question2 = types.KeyboardButton("سوالات امتحان نهایی و مشابه آن")
+
+btn_back = types.KeyboardButton("🔙 بازگشت")
+
+markup_fos.add(fos1, fos2)
+markup_fos.add(fos3)
+markup_fos.row(btn_back)
+
 # =========================
 #   add Reply Keyboard
 # =========================
@@ -512,15 +470,56 @@ markup_dars.row(btn_riazi, btn_fizik)
 # =========================
 
 @bot.message_handler(commands=["start"])
+
+@bot.message_handler(func=lambda m: m.text == "🔙 بازگشت")
+def back_page(message):
+
+    page = navigation.back(message.chat.id)
+
+    if page == "start":
+        start(message)
+
+    elif page == "learning":
+        learning(message)
+
+    elif page == "tajrobi":
+        tajrobi(message)
+
+    elif page == "riazi":
+        riazi(message)
+
+    elif page == "ensani":
+        ensani(message)
+
+
 def start(message):
+    navigation.reset(message.chat.id)
     bot.send_message(message.chat.id,"سلام به ربات درس یار خوش آمدید.\nچطور می‌توانم کمکتان کنم؟",reply_markup=markup_btn)
 
 # =========================
 # شروع یادگیری
 # =========================
 
-@bot.message_handler(func=lambda message: message.text == "شروع یادگیری")
+
+    page = navigation.back(message.chat.id)
+
+    if page == "start":
+        start(message)
+
+    elif page == "learning":
+        learning(message)
+
+    elif page == "tajrobi":
+        tajrobi(message)
+
+    elif page == "riazi":
+        riazi(message)
+
+    elif page == "ensani":
+        ensani(message)
+
 def learning(message):
+    navigation.push(message.chat.id, "learning")
     bot.send_message(message.chat.id,"لطفاً رشته تحصیلی خود را انتخاب کنید.",reply_markup=markup_fos)
 
 # =========================
@@ -529,7 +528,8 @@ def learning(message):
 
 @bot.message_handler(func=lambda message: message.text == "تجربی")
 def tajrobi(message):
-    save_page(message.chat.id, "tajrobi")
+    navigation.push(message.chat.id, "tajrobi")
+
 
     user_data[message.chat.id] = {}
 
@@ -540,7 +540,8 @@ def tajrobi(message):
 
 @bot.message_handler(func=lambda message: message.text == "ریاضی")
 def riazi_field(message):
-    save_page(message.chat.id, "riazi")
+    navigation.push(message.chat.id, "riazi")
+
 
     user_data[message.chat.id] = {}
 
@@ -551,7 +552,8 @@ def riazi_field(message):
 
 @bot.message_handler(func=lambda message: message.text == "انسانی")
 def ensani(message):
-    save_page(message.chat.id, "ensani")
+    navigation.push(message.chat.id, "ensani")
+
 
     user_data[message.chat.id] = {}
 
@@ -565,7 +567,7 @@ def ensani(message):
 
 @bot.message_handler(func=lambda message: message.text == "دهم")
 def ten(message):
-    save_page(message.chat.id, "ten")
+
 
     user_data[message.chat.id]["base"] = "دهم"
 
@@ -574,7 +576,7 @@ def ten(message):
 
 @bot.message_handler(func=lambda message: message.text == "یازدهم")
 def eleven(message):
-    save_page(message.chat.id, "eleven")
+
 
     user_data[message.chat.id]["base"] = "یازدهم"
     bot.send_message(message.chat.id,"یکی از گزینه‌های زیر را انتخاب کنید.",reply_markup=markup_question)
@@ -582,7 +584,7 @@ def eleven(message):
 
 @bot.message_handler(func=lambda message: message.text == "کنکوری(دوازدهم)")
 def twelve(message):
-    save_page(message.chat.id, "twelve")
+
 
     user_data[message.chat.id]["base"] = "دوازدهم"
     bot.send_message(message.chat.id,"یکی از گزینه‌های زیر را انتخاب کنید.",reply_markup=markup_question)
@@ -593,7 +595,7 @@ def twelve(message):
 
 @bot.message_handler(func=lambda message: message.text == "سوالات کنکور و مشابه آن")
 def question(message):
-    save_page(message.chat.id, "question")
+
 
     bot.send_message(message.chat.id,"لطفاً درس مورد نظر را انتخاب کنید.",reply_markup=markup_dars)
 
